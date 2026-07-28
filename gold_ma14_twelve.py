@@ -2,6 +2,7 @@
 """
 Gold MA14 Cross Monitor - Fixed Version with History Logging
 Karpathy guidelines: simple, correct, no over-engineering.
+Secrets are injected via environment variables.
 """
 import urllib.request
 import json
@@ -12,18 +13,18 @@ import csv
 from datetime import datetime, timezone
 
 # ==================== CONFIG ====================
-TWELVE_DATA_API_KEY = "832cf3c990594c9ca5f142b40ee3761c"
+TWELVE_DATA_API_KEY = os.environ.get("TWELVE_DATA_API_KEY", "")
 SYMBOL = "XAU/USD"
 INTERVAL = "30min"
 OUTPUTSIZE = 60
 
-MEMORY_FILE = "/root/gold_ma14_signal_memory.json"
-STATUS_FILE = "/root/gold_ma14_status.json"
-OUTPUT_HTML = "/root/gold_ma14_twelve_report.html"
-HISTORY_FILE = "/root/gold_ma14_history.csv"
+MEMORY_FILE = os.environ.get("MEMORY_FILE", "gold_ma14_signal_memory.json")
+STATUS_FILE = os.environ.get("STATUS_FILE", "gold_ma14_status.json")
+OUTPUT_HTML = os.environ.get("OUTPUT_HTML", "gold_ma14_twelve_report.html")
+HISTORY_FILE = os.environ.get("HISTORY_FILE", "gold_ma14_history.csv")
 
-TELEGRAM_BOT_TOKEN = "8495697171:AAF9NTvA2gLnHITGA0QWtPD9-Myd8ckGeuU"
-TELEGRAM_USER_ID = "5278674012"
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_USER_ID = os.environ.get("TELEGRAM_USER_ID", "")
 
 CROSS_THRESHOLD = 0.05  # USD
 # =================================================
@@ -131,6 +132,9 @@ def detect_cross(data):
 
 def send_telegram(signal, price, ma14):
     """Send Telegram alert."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_USER_ID:
+        print("[WARN] Telegram credentials not configured, skipping notification")
+        return
     label = "📈 金叉 (UP)" if signal == "GOLD_CROSS_UP" else "📉 死叉 (DOWN)"
     dev = ((price - ma14) / ma14 * 100) if ma14 else 0
     msg = (f"{label}\n"

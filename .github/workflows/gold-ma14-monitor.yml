@@ -18,6 +18,10 @@ jobs:
           python-version: '3.11'
 
       - name: Run Gold MA14 Monitor
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_USER_ID: ${{ secrets.TELEGRAM_USER_ID }}
         run: python3 gold_ma14_twelve.py
 
       - name: Commit updated files
